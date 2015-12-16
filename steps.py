@@ -2,7 +2,9 @@ from numpy import zeros, mean
 from pymatgen import Composition, Element
 # Train linear ridge regression model using naive feature set
 from sklearn import linear_model, cross_validation, metrics, ensemble
-
+import pandas as pd
+import matplotlib.pyplot as plt
+#matplotlib.style.use('ggplot')
 
 # Training file containing band gaps extracted from Materials Project
 # created in previous blog post and linked here
@@ -118,3 +120,27 @@ scores = cross_validation.cross_val_score(rfr, physicalFeatures, bandgaps, cv=cv
 
 print("The MAE of the nonlinear random forest band gap model using the physical feature set is: "\
 	+ str(round(abs(mean(scores)), 3)) + " eV")
+
+##############################################################################################################
+
+
+df = pd.read_csv('bandgapDFT.csv', header=None, names=['Compound name','Band gap (eV)'])
+print df[0:2]
+
+print df.describe()
+
+#df.plot(kind='hist')
+#df.hist()
+#plt.show()
+
+print df.iloc[1:4,1:2]
+
+df1 = df.copy()
+def square(x):
+    return (x[1])**2
+
+df1['Square of band gaps (eV^2)'] = df1.apply(square,axis=1)
+print df1[0:3]
+
+df1.plot(kind='scatter',x='Band gap (eV)', y='Square of band gaps (eV^2)')
+plt.show()
