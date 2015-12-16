@@ -122,7 +122,8 @@ print("The MAE of the nonlinear random forest band gap model using the physical 
 	+ str(round(abs(mean(scores)), 3)) + " eV")
 
 ##############################################################################################################
-
+#Anubhav's steps
+##############################################################################################################
 
 df = pd.read_csv('bandgapDFT.csv', header=None, names=['Compound name','Band gap (eV)'])
 print df[0:2]
@@ -130,8 +131,8 @@ print df[0:2]
 print df.describe()
 
 #df.plot(kind='hist')
-#df.hist()
-#plt.show()
+df.hist()
+plt.show()
 
 print df.iloc[1:4,1:2]
 
@@ -140,7 +141,7 @@ def square(x):
     return (x[1])**2
 
 df1['Square of band gaps (eV^2)'] = df1.apply(square,axis=1)
-#print df1[0:3]
+print df1[0:3]
 
-#df1.plot(kind='scatter',x='Band gap (eV)', y='Square of band gaps (eV^2)')
-#plt.show()
+df1.plot(kind='scatter',x='Band gap (eV)', y='Square of band gaps (eV^2)')
+plt.show()
