@@ -140,7 +140,7 @@ def square(x):
     return (x[1])**2
 
 df1['Square of band gaps (eV^2)'] = df1.apply(square,axis=1)
-print df1[0:3]
+#print df1[0:3]
 
-df1.plot(kind='scatter',x='Band gap (eV)', y='Square of band gaps (eV^2)')
-plt.show()
+#df1.plot(kind='scatter',x='Band gap (eV)', y='Square of band gaps (eV^2)')
+#plt.show()
