@@ -28,11 +28,11 @@ naiveFeatures = []
 MAX_Z = 100 # maximum length of vector to hold naive feature set
 
 for line in trainFile:
-       split = str.split(line, ',')
-       material = Composition(split[0])
-       materials.append(material) #store chemical formulas
-       naiveFeatures.append(naiveVectorize(material)) #create features from chemical formula
-       bandgaps.append(float(split[1])) #store numerical values of band gaps
+    split = str.split(line, ',')
+    material = Composition(split[0])
+    materials.append(material) #store chemical formulas
+    naiveFeatures.append(naiveVectorize(material)) #create features from chemical formula
+    bandgaps.append(float(split[1])) #store numerical values of band gaps
 
 ##############################################################################################################
 
