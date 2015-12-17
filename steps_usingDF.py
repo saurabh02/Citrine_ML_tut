@@ -29,48 +29,33 @@ def extractVectors(x):
     material = Composition(x[0])
     return tuple(naiveVectorize(material))
 
+# Constructing naive feature set and adding it to the DF
 df1 = df.copy()
 df1['naiveFeatures'] = df1.apply(extractVectors,axis=1)
 print df1[0:2]
 
 
-# Extract materials and band gaps into lists, and construct naive feature set
-materials = []
-bandgaps = []
-naiveFeatures = []
-
-
-
-# for line in trainFile:
-#        split = str.split(line, ',')
-#        material = Composition(split[0])
-#        materials.append(material) #store chemical formulas
-#        naiveFeatures.append(naiveVectorize(material)) #create features from chemical formula
-#        bandgaps.append(float(split[1])) #store numerical values of band gaps
+# Establish baseline accuracy by "guessing the average" of the band gap set
+# A good model should never do worse.
+baselineError = mean(abs(mean(df1[['bandgaps']]) - df1[['bandgaps']]))
+print("The MAE of always guessing the average band gap is: " + str(round(baselineError, 3)) + " eV")
 
 ##############################################################################################################
 
-# Establish baseline accuracy by "guessing the average" of the band gap set
-# A good model should never do worse.
-# baselineError = mean(abs(mean(bandgaps) - bandgaps))
-# print("The MAE of always guessing the average band gap is: " + str(round(baselineError, 3)) + " eV")
-#
-# ##############################################################################################################
-#
-# #alpha is a tuning parameter affecting how regression deals with collinear inputs
-# linear = linear_model.Ridge(alpha = 0.5)
-#
-# cv = cross_validation.ShuffleSplit(len(bandgaps), n_iter=10, test_size=0.1, random_state=0)
-#
-# scores = cross_validation.cross_val_score(linear, naiveFeatures, bandgaps, cv=cv, scoring='mean_absolute_error')
-#
-# print("The MAE of the linear ridge regression band gap model using the naive feature set is: "\
-# 	+ str(round(abs(mean(scores)), 3)) + " eV")
-#
-# ##############################################################################################################
-#
-# # Let's see which features are most important for the linear model
-#
+#alpha is a tuning parameter affecting how regression deals with collinear inputs
+linear = linear_model.Ridge(alpha = 0.5)
+
+cv = cross_validation.ShuffleSplit(len(df1), n_iter=10, test_size=0.1, random_state=0)
+
+scores = cross_validation.cross_val_score(linear, list(df1['naiveFeatures']), df1['bandgaps'], cv=cv, scoring='mean_absolute_error')
+
+print("The MAE of the linear ridge regression band gap model using the naive feature set is: "\
+	+ str(round(abs(mean(scores)), 3)) + " eV")
+
+##############################################################################################################
+
+# Let's see which features are most important for the linear model
+
 # print("Below are the fitted linear ridge regression coefficients for each feature (i.e., element) in our naive feature set")
 #
 # linear.fit(naiveFeatures, bandgaps) # fit to the whole data set; we're not doing CV here
