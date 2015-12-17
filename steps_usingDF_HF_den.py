@@ -9,7 +9,7 @@ import pandas as pd
 
 # Training file containing band gaps extracted from Materials Project
 # created in previous blog post and linked here
-df = pd.read_csv('bandgapDFT.csv', header=None, names=['materials', 'bandgaps'])
+df = pd.read_csv('bandgap_energy_densityDFT.csv', header=None, names=['materials', 'bandgaps','formenergies','densities'])
 print df[0:2]
 print df.columns
 
@@ -105,6 +105,8 @@ def extractphysicalFeatures(x):
     theseFeatures.append(eneg[0] - eneg[1])
     theseFeatures.append(group[0])
     theseFeatures.append(group[1])
+    theseFeatures.append(x[2])
+    #theseFeatures.append(x[3])
     # physicalFeatures.append(theseFeatures)
     return tuple(theseFeatures)
 
