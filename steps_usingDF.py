@@ -119,14 +119,14 @@ print("The MAE of the linear ridge regression band gap model using the physical 
 
 ##############################################################################################################
 
-# rfr = ensemble.RandomForestRegressor(n_estimators=10) #try 10 trees in the forest
-#
-# scores = cross_validation.cross_val_score(rfr, naiveFeatures, bandgaps, cv=cv, scoring='mean_absolute_error')
-#
-# print("The MAE of the nonlinear random forest band gap model using the naive feature set is: "\
-# 	+ str(round(abs(mean(scores)), 3)) + " eV")
-#
-# scores = cross_validation.cross_val_score(rfr, physicalFeatures, bandgaps, cv=cv, scoring='mean_absolute_error')
-#
-# print("The MAE of the nonlinear random forest band gap model using the physical feature set is: "\
-# 	+ str(round(abs(mean(scores)), 3)) + " eV")
+rfr = ensemble.RandomForestRegressor(n_estimators=10) #try 10 trees in the forest
+
+scores = cross_validation.cross_val_score(rfr, list(df1['naiveFeatures']), df1['bandgaps'], cv=cv, scoring='mean_absolute_error')
+
+print("The MAE of the nonlinear random forest band gap model using the naive feature set is: "\
+	+ str(round(abs(mean(scores)), 3)) + " eV")
+
+scores = cross_validation.cross_val_score(rfr, list(df1['physicalFeatures']), df1['bandgaps'], cv=cv, scoring='mean_absolute_error')
+
+print("The MAE of the nonlinear random forest band gap model using the physical feature set is: " \
+      + str(round(abs(mean(scores)), 3)) + " eV")
