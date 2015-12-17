@@ -106,7 +106,7 @@ def extractphysicalFeatures(x):
     theseFeatures.append(group[0])
     theseFeatures.append(group[1])
     theseFeatures.append(x[2])
-    #theseFeatures.append(x[3])
+    theseFeatures.append(x[3])
     # physicalFeatures.append(theseFeatures)
     return tuple(theseFeatures)
 
