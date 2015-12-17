@@ -56,17 +56,17 @@ print("The MAE of the linear ridge regression band gap model using the naive fea
 
 # Let's see which features are most important for the linear model
 
-# print("Below are the fitted linear ridge regression coefficients for each feature (i.e., element) in our naive feature set")
-#
-# linear.fit(naiveFeatures, bandgaps) # fit to the whole data set; we're not doing CV here
-#
-# print("element: coefficient")
-#
-# for i in range(MAX_Z):
-#        element = Element.from_Z(i + 1)
-#        print(element.symbol + ': ' + str(linear.coef_[i]))
-#
-# ##############################################################################################################
+print("Below are the fitted linear ridge regression coefficients for each feature (i.e., element) in our naive feature set")
+
+linear.fit(list(df1['naiveFeatures']), df1['bandgaps']) # fit to the whole data set; we're not doing CV here
+
+print("element: coefficient")
+
+for i in range(MAX_Z):
+       element = Element.from_Z(i + 1)
+       print(element.symbol + ': ' + str(linear.coef_[i]))
+
+##############################################################################################################
 #
 # # Create alternative feature set that is more physically-motivated
 #
