@@ -1,15 +1,32 @@
-from numpy import zeros, mean
-from pymatgen import Composition, Element
-# Train linear ridge regression model using naive feature set
+import numpy as np
+from pandas.tools.plotting import scatter_matrix
+from pymatgen import Composition, Element, MPRester, periodic_table
 from sklearn import linear_model, cross_validation, metrics, ensemble
 import pandas as pd
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import itertools
 
 # matplotlib.style.use('ggplot')
 
-# Training file containing band gaps extracted from Materials Project
-# created in previous blog post and linked here
-df = pd.read_csv('bandgap_energy_densityDFT.csv', header=None, names=['materials', 'bandgaps','formenergies','densities'])
+#binaries_data = np.array
+df = pd.DataFrame()
+allBinaries = itertools.combinations(periodic_table.all_symbols(), 2)  # Create list of all binary systems
+
+with MPRester() as m:
+    for system in allBinaries:
+        results = m.get_data(system[0] + '-' + system[1],data_type='vasp')# Download DFT data for each binary system
+        for material in results:  # We will receive many compounds within each binary system
+                if material['e_above_hull'] < 1e-6:  # Check if this compound is thermodynamically stable
+                    dat = []
+                    dat.append(material['pretty_formula'])
+                    dat.append(material['band_gap'])
+                    dat.append(material['formation_energy_per_atom'])
+                    dat.append(material['density'])
+                    df = df.append(pd.Series(dat), ignore_index=True)
+
+df.columns = ['materials', 'bandgaps','formenergies','densities']
+#df = pd.DataFrame(binaries_data)
+#df = pd.read_csv('bandgap_energy_densityDFT.csv', header=None, names=['materials', 'bandgaps','formenergies','densities'])
 print df[0:2]
 print df.columns
 
@@ -20,7 +37,7 @@ MAX_Z = 100  # maximum length of vector to hold naive feature set
 
 
 def naiveVectorize(composition):
-    vector = zeros((MAX_Z))
+    vector = np.zeros((MAX_Z))
     for element in composition:
         fraction = composition.get_atomic_fraction(element)
         vector[element.Z - 1] = fraction
@@ -36,10 +53,10 @@ def extractVectors(x):
 df1 = df.copy()
 df1['naiveFeatures'] = df1.apply(extractVectors, axis=1)
 print df1[0:2]
-
+print type(df1[['bandgaps']])
 # Establish baseline accuracy by "guessing the average" of the band gap set
 # A good model should never do worse.
-baselineError = mean(abs(mean(df1[['bandgaps']]) - df1[['bandgaps']]))
+baselineError = np.mean(abs(np.mean(df1[['bandgaps']]) - df1[['bandgaps']]))
 print("The MAE of always guessing the average band gap is: " + str(round(baselineError, 3)) + " eV")
 
 ##############################################################################################################
@@ -53,7 +70,7 @@ scores = cross_validation.cross_val_score(linear, list(df1['naiveFeatures']), df
                                           scoring='mean_absolute_error')
 
 print("The MAE of the linear ridge regression band gap model using the naive feature set is: " \
-      + str(round(abs(mean(scores)), 3)) + " eV")
+      + str(round(abs(np.mean(scores)), 3)) + " eV")
 
 ##############################################################################################################
 
@@ -105,7 +122,7 @@ def extractphysicalFeatures(x):
     theseFeatures.append(eneg[0] - eneg[1])
     theseFeatures.append(group[0])
     theseFeatures.append(group[1])
-    theseFeatures.append(x[2])
+    #theseFneatures.append(x[2])
     theseFeatures.append(x[3])
     # physicalFeatures.append(theseFeatures)
     return tuple(theseFeatures)
@@ -117,7 +134,7 @@ scores = cross_validation.cross_val_score(linear, list(df1['physicalFeatures']),
                                           scoring='mean_absolute_error')
 
 print("The MAE of the linear ridge regression band gap model using the physical feature set is: " \
-      + str(round(abs(mean(scores)), 3)) + " eV")
+      + str(round(abs(np.mean(scores)), 3)) + " eV")
 
 ##############################################################################################################
 
@@ -126,9 +143,12 @@ rfr = ensemble.RandomForestRegressor(n_estimators=10) #try 10 trees in the fores
 scores = cross_validation.cross_val_score(rfr, list(df1['naiveFeatures']), df1['bandgaps'], cv=cv, scoring='mean_absolute_error')
 
 print("The MAE of the nonlinear random forest band gap model using the naive feature set is: "\
-	+ str(round(abs(mean(scores)), 3)) + " eV")
+	+ str(round(abs(np.mean(scores)), 3)) + " eV")
 
 scores = cross_validation.cross_val_score(rfr, list(df1['physicalFeatures']), df1['bandgaps'], cv=cv, scoring='mean_absolute_error')
 
 print("The MAE of the nonlinear random forest band gap model using the physical feature set is: " \
-      + str(round(abs(mean(scores)), 3)) + " eV")
+      + str(round(abs(np.mean(scores)), 3)) + " eV")
+
+scatter_matrix(df1)
+plt.show()

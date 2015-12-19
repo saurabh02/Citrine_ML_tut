@@ -20,7 +20,7 @@ with MPRester() as m:
                     dat.append(material['pretty_formula'])
                     dat.append(str(material['band_gap']))
                     dat.append(str(material['formation_energy_per_atom']))
-                    dat.append(str(material['density']))  # Output band gap csv to the screen
+                    dat.append(str(material['density']))
                     csv_writer.writerow(dat)
 
 
