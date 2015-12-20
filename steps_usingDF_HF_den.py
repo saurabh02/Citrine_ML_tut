@@ -122,9 +122,8 @@ def extractphysicalFeatures(x):
     theseFeatures.append(eneg[0] - eneg[1])
     theseFeatures.append(group[0])
     theseFeatures.append(group[1])
-    #theseFneatures.append(x[2])
+    theseFeatures.append(x[2])
     theseFeatures.append(x[3])
-    # physicalFeatures.append(theseFeatures)
     return tuple(theseFeatures)
 
 
