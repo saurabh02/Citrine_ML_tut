@@ -1,11 +1,6 @@
 Here are my comments:
 
-1. You should organize the folder better. A user should see your folder and know exactly what's what. e.g.:
-	* figure outputs in a separate folder, e.g. "output_figs"
-	* CSV data dumps in separate folder, e.g. "data_records"
-	* Code and historical code clearly labeled. Either put the historical code in an "archive" folder, or better yet, label the code with the corresponding step on the Google Doc, e.g. "step_1" folder or "step_2" folder. Then at least I will know which code corresponds to what step.
-	
-2. Add a place in the code for the user to enter their API key before calling MPRester. They can leave it as None if they have already set the MAPI_KEY.
+
 
 3. Put comments/docstring of functions like naiveVectorize inside the function itself, not above them. See PEP guidelines.
 

@@ -1,32 +1,30 @@
 import numpy as np
 from pandas.tools.plotting import scatter_matrix
 from pymatgen import Composition, Element, MPRester, periodic_table
-from sklearn import linear_model, cross_validation, metrics, ensemble
+from sklearn import linear_model, cross_validation, ensemble
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 
-# matplotlib.style.use('ggplot')
-
-#binaries_data = np.array
 df = pd.DataFrame()
 allBinaries = itertools.combinations(periodic_table.all_symbols(), 2)  # Create list of all binary systems
 
-with MPRester() as m:
-    for system in allBinaries:
-        results = m.get_data(system[0] + '-' + system[1],data_type='vasp')# Download DFT data for each binary system
-        for material in results:  # We will receive many compounds within each binary system
-                if material['e_above_hull'] < 1e-6:  # Check if this compound is thermodynamically stable
-                    dat = []
-                    dat.append(material['pretty_formula'])
-                    dat.append(material['band_gap'])
-                    dat.append(material['formation_energy_per_atom'])
-                    dat.append(material['density'])
-                    df = df.append(pd.Series(dat), ignore_index=True)
+API_KEY = None  # Enter your key received from Materials Project
 
-df.columns = ['materials', 'bandgaps','formenergies','densities']
-#df = pd.DataFrame(binaries_data)
-#df = pd.read_csv('bandgap_energy_densityDFT.csv', header=None, names=['materials', 'bandgaps','formenergies','densities'])
+if API_KEY is None:
+    m = MPRester()
+else:
+    m = MPRester(API_KEY)
+
+for system in allBinaries:
+    results = m.get_data(system[0] + '-' + system[1], data_type='vasp')  # Download DFT data for each binary system
+    for material in results:  # We will receive many compounds within each binary system
+        if material['e_above_hull'] < 1e-6:  # Check if this compound is thermodynamically stable
+            dat = [material['pretty_formula'], material['band_gap'], material['formation_energy_per_atom'],
+                   material['density']]
+            df = df.append(pd.Series(dat), ignore_index=True)
+
+df.columns = ['materials', 'bandgaps', 'formenergies', 'densities']
 print df[0:2]
 print df.columns
 
@@ -36,15 +34,15 @@ print df.columns
 MAX_Z = 100  # maximum length of vector to hold naive feature set
 
 
-def naiveVectorize(composition):
-    vector = np.zeros((MAX_Z))
+def naive_vectorize(composition):
+    vector = np.zeros(MAX_Z)
     for element in composition:
         fraction = composition.get_atomic_fraction(element)
         vector[element.Z - 1] = fraction
-    return (vector)
+    return vector
 
 
-def extractVectors(x):
+def extract_vectors(x):
     material = Composition(x[0])
     return tuple(naiveVectorize(material))
 
@@ -77,7 +75,8 @@ print("The MAE of the linear ridge regression band gap model using the naive fea
 # Let's see which features are most important for the linear model
 
 print(
-"Below are the fitted linear ridge regression coefficients for each feature (i.e., element) in our naive feature set")
+    "Below are the fitted linear ridge regression coefficients for each feature (i.e., element) in our naive feature "
+    "set")
 
 linear.fit(list(df1['naiveFeatures']), df1['bandgaps'])  # fit to the whole data set; we're not doing CV here
 
@@ -137,14 +136,16 @@ print("The MAE of the linear ridge regression band gap model using the physical 
 
 ##############################################################################################################
 
-rfr = ensemble.RandomForestRegressor(n_estimators=10) #try 10 trees in the forest
+rfr = ensemble.RandomForestRegressor(n_estimators=10)  # try 10 trees in the forest
 
-scores = cross_validation.cross_val_score(rfr, list(df1['naiveFeatures']), df1['bandgaps'], cv=cv, scoring='mean_absolute_error')
+scores = cross_validation.cross_val_score(rfr, list(df1['naiveFeatures']), df1['bandgaps'], cv=cv,
+                                          scoring='mean_absolute_error')
 
-print("The MAE of the nonlinear random forest band gap model using the naive feature set is: "\
-	+ str(round(abs(np.mean(scores)), 3)) + " eV")
+print("The MAE of the nonlinear random forest band gap model using the naive feature set is: " \
+      + str(round(abs(np.mean(scores)), 3)) + " eV")
 
-scores = cross_validation.cross_val_score(rfr, list(df1['physicalFeatures']), df1['bandgaps'], cv=cv, scoring='mean_absolute_error')
+scores = cross_validation.cross_val_score(rfr, list(df1['physicalFeatures']), df1['bandgaps'], cv=cv,
+                                          scoring='mean_absolute_error')
 
 print("The MAE of the nonlinear random forest band gap model using the physical feature set is: " \
       + str(round(abs(np.mean(scores)), 3)) + " eV")
