@@ -67,8 +67,8 @@ cv = cross_validation.ShuffleSplit(len(df1), n_iter=10, test_size=0.1, random_st
 scores = cross_validation.cross_val_score(linear, list(df1['naiveFeatures']), df1['bandgaps'], cv=cv,
                                           scoring='mean_absolute_error')
 
-print("The MAE of the linear ridge regression band gap model using the naive feature set is: " \
-      + str(round(abs(np.mean(scores)), 3)) + " eV")
+print("The MAE of the linear ridge regression band gap model using the naive feature set is: " + str(
+        round(abs(np.mean(scores)), 3)) + " eV")
 
 ##############################################################################################################
 
@@ -94,35 +94,35 @@ for i in range(MAX_Z):
 # physicalFeatures = []
 #
 def extract_physical_features(x):
-    theseFeatures = []
+    these_features = []
     fraction = []
-    atomicNo = []
+    atomicno = []
     eneg = []
     group = []
 
-    for element in Composition(x[0]):
-        fraction.append(Composition(x[0]).get_atomic_fraction(element))
-        atomicNo.append(float(element.Z))
-        eneg.append(element.X)
-        group.append(float(element.group))
+    for elem in Composition(x[0]):
+        fraction.append(Composition(x[0]).get_atomic_fraction(elem))
+        atomicno.append(float(elem.Z))
+        eneg.append(elem.X)
+        group.append(float(elem.group))
 
     # We want to sort this feature set
     # according to which element in the binary compound is more abundant
-    mustReverse = False
+    must_reverse = False
 
     if fraction[1] > fraction[0]:
-        mustReverse = True
+        must_reverse = True
 
-    for features in [fraction, atomicNo, eneg, group]:
-        if mustReverse:
+    for features in [fraction, atomicno, eneg, group]:
+        if must_reverse:
             features.reverse()
-    theseFeatures.append(fraction[0] / fraction[1])
-    theseFeatures.append(eneg[0] - eneg[1])
-    theseFeatures.append(group[0])
-    theseFeatures.append(group[1])
-    theseFeatures.append(x[2])
-    theseFeatures.append(x[3])
-    return tuple(theseFeatures)
+    these_features.append(fraction[0] / fraction[1])
+    these_features.append(eneg[0] - eneg[1])
+    these_features.append(group[0])
+    these_features.append(group[1])
+    these_features.append(x[2])
+    these_features.append(x[3])
+    return tuple(these_features)
 
 
 df1['physicalFeatures'] = df1.apply(extract_physical_features, axis=1)
@@ -130,8 +130,8 @@ df1['physicalFeatures'] = df1.apply(extract_physical_features, axis=1)
 scores = cross_validation.cross_val_score(linear, list(df1['physicalFeatures']), df1['bandgaps'], cv=cv,
                                           scoring='mean_absolute_error')
 
-print("The MAE of the linear ridge regression band gap model using the physical feature set is: " \
-      + str(round(abs(np.mean(scores)), 3)) + " eV")
+print("The MAE of the linear ridge regression band gap model using the physical feature set is: " + str(
+    round(abs(np.mean(scores)), 3)) + " eV")
 
 ##############################################################################################################
 
@@ -140,14 +140,14 @@ rfr = ensemble.RandomForestRegressor(n_estimators=10)  # try 10 trees in the for
 scores = cross_validation.cross_val_score(rfr, list(df1['naiveFeatures']), df1['bandgaps'], cv=cv,
                                           scoring='mean_absolute_error')
 
-print("The MAE of the nonlinear random forest band gap model using the naive feature set is: " \
-      + str(round(abs(np.mean(scores)), 3)) + " eV")
+print("The MAE of the nonlinear random forest band gap model using the naive feature set is: " + str(
+    round(abs(np.mean(scores)), 3)) + " eV")
 
 scores = cross_validation.cross_val_score(rfr, list(df1['physicalFeatures']), df1['bandgaps'], cv=cv,
                                           scoring='mean_absolute_error')
 
-print("The MAE of the nonlinear random forest band gap model using the physical feature set is: " \
-      + str(round(abs(np.mean(scores)), 3)) + " eV")
+print("The MAE of the nonlinear random forest band gap model using the physical feature set is: " + str(
+    round(abs(np.mean(scores)), 3)) + " eV")
 
 scatter_matrix(df1)
 plt.show()
