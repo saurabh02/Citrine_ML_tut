@@ -36,22 +36,22 @@ MAX_Z = 100  # maximum length of vector to hold naive feature set
 
 def naive_vectorize(composition):
     vector = np.zeros(MAX_Z)
-    for element in composition:
-        fraction = composition.get_atomic_fraction(element)
-        vector[element.Z - 1] = fraction
+    for ele in composition:
+        fraction = composition.get_atomic_fraction(ele)
+        vector[ele.Z - 1] = fraction
     return vector
 
 
 def extract_vectors(x):
-    material = Composition(x[0])
-    return tuple(naiveVectorize(material))
+    mater = Composition(x)
+    return tuple(naive_vectorize(mater))
 
 
 # Constructing naive feature set and adding it to the DF
 df1 = df.copy()
-df1['naiveFeatures'] = df1.apply(extractVectors, axis=1)
+df1['naiveFeatures'] = df1[0].apply(extract_vectors)
 print df1[0:2]
-print type(df1[['bandgaps']])
+
 # Establish baseline accuracy by "guessing the average" of the band gap set
 # A good model should never do worse.
 baselineError = np.mean(abs(np.mean(df1[['bandgaps']]) - df1[['bandgaps']]))
@@ -93,8 +93,7 @@ for i in range(MAX_Z):
 #
 # physicalFeatures = []
 #
-def extractphysicalFeatures(x):
-    #    for material in x[0]:
+def extract_physical_features(x):
     theseFeatures = []
     fraction = []
     atomicNo = []
@@ -126,7 +125,7 @@ def extractphysicalFeatures(x):
     return tuple(theseFeatures)
 
 
-df1['physicalFeatures'] = df1.apply(extractphysicalFeatures, axis=1)
+df1['physicalFeatures'] = df1.apply(extract_physical_features, axis=1)
 
 scores = cross_validation.cross_val_score(linear, list(df1['physicalFeatures']), df1['bandgaps'], cv=cv,
                                           scoring='mean_absolute_error')
