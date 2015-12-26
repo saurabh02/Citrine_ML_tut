@@ -28,13 +28,14 @@ df.columns = ['materials', 'bandgaps', 'formenergies', 'densities']
 print df[0:2]
 print df.columns
 
-# Input: pymatgen Composition object
-# Output: length-100 vector representing any chemical formula
-
 MAX_Z = 100  # maximum length of vector to hold naive feature set
 
 
 def naive_vectorize(composition):
+    """
+    :param composition: pymatgen Composition object
+    :return: length-100 vector representing any chemical formula
+    """
     vector = np.zeros(MAX_Z)
     for ele in composition:
         fraction = composition.get_atomic_fraction(ele)
@@ -43,13 +44,17 @@ def naive_vectorize(composition):
 
 
 def extract_vectors(x):
+    """
+    :param x: Pandas data frame object
+    :return: tuple containing the naive feature set
+    """
     mater = Composition(x)
     return tuple(naive_vectorize(mater))
 
 
 # Constructing naive feature set and adding it to the DF
 df1 = df.copy()
-df1['naiveFeatures'] = df1[0].apply(extract_vectors)
+df1['naiveFeatures'] = df1['materials'].apply(extract_vectors)
 print df1[0:2]
 
 # Establish baseline accuracy by "guessing the average" of the band gap set
@@ -62,7 +67,7 @@ print("The MAE of always guessing the average band gap is: " + str(round(baselin
 # alpha is a tuning parameter affecting how regression deals with collinear inputs
 linear = linear_model.Ridge(alpha=0.5)
 
-cv = cross_validation.ShuffleSplit(len(df1), n_iter=10, test_size=0.1, random_state=0)
+cv = cross_validation.ShuffleSplit(len(df1['materials']), n_iter=10, test_size=0.1, random_state=0)
 
 scores = cross_validation.cross_val_score(linear, list(df1['naiveFeatures']), df1['bandgaps'], cv=cv,
                                           scoring='mean_absolute_error')
@@ -88,12 +93,14 @@ for i in range(MAX_Z):
 
 
 ##############################################################################################################
-#
-# # Create alternative feature set that is more physically-motivated
-#
-# physicalFeatures = []
-#
+
+
 def extract_physical_features(x):
+    """
+    Create alternative feature set that is more physically-motivated
+    :param x: Pandas data frame
+    :return: a tuple of physical features
+    """
     these_features = []
     fraction = []
     atomicno = []
@@ -131,7 +138,7 @@ scores = cross_validation.cross_val_score(linear, list(df1['physicalFeatures']),
                                           scoring='mean_absolute_error')
 
 print("The MAE of the linear ridge regression band gap model using the physical feature set is: " + str(
-    round(abs(np.mean(scores)), 3)) + " eV")
+        round(abs(np.mean(scores)), 3)) + " eV")
 
 ##############################################################################################################
 
@@ -141,13 +148,13 @@ scores = cross_validation.cross_val_score(rfr, list(df1['naiveFeatures']), df1['
                                           scoring='mean_absolute_error')
 
 print("The MAE of the nonlinear random forest band gap model using the naive feature set is: " + str(
-    round(abs(np.mean(scores)), 3)) + " eV")
+        round(abs(np.mean(scores)), 3)) + " eV")
 
 scores = cross_validation.cross_val_score(rfr, list(df1['physicalFeatures']), df1['bandgaps'], cv=cv,
                                           scoring='mean_absolute_error')
 
 print("The MAE of the nonlinear random forest band gap model using the physical feature set is: " + str(
-    round(abs(np.mean(scores)), 3)) + " eV")
+        round(abs(np.mean(scores)), 3)) + " eV")
 
 scatter_matrix(df1)
 plt.show()
